@@ -30,11 +30,14 @@ python -m mujoco.viewer --mjcf models/mjcf/robocon2026_old.xml
 
 ## LiDAR Simulation
 
-1. Please follow the [LiDAR Installation Tutorial](https://github.com/TATP-233/MuJoCo-LiDAR/blob/main/README_zh.md#%E5%BF%AB%E9%80%9F%E5%AE%89%E8%A3%85) to set up the lidar simulation environment (GPU backend recommended)
+1. Please follow the [LiDAR Installation Tutorial](https://github.com/TATP-233/MuJoCo-LiDAR/blob/main/README_zh.md#%E5%BF%AB%E9%80%9F%E5%AE%89%E8%A3%85) to set up the lidar simulation environment. For **GPU backend**, install Taichi: `pip3 install taichi`. If Taichi is not installed, use **CPU backend**: `python3 src/lidar_sim_native.py --backend cpu`.
 
 ```bash
 cd ROBOCON2026_Scene
-python src/lidar_sim_native.py
+# GPU backend (requires taichi)
+python3 src/lidar_sim_native.py
+# or CPU backend (no taichi needed)
+python3 src/lidar_sim_native.py --backend cpu
 ```
 
 <img src="./assets/lidar_sim_native.png" alt="image-lidar_sim" style="zoom:50%;" />
@@ -44,7 +47,7 @@ python src/lidar_sim_native.py
 
 ```bash
 cd ROBOCON2026_Scene
-python src/lidar_sim_ros2.py
+python3 src/lidar_sim_ros2.py
 ```
 
 <img src="./assets/lidar_sim_ros2.png" alt="image-lidar_sim" style="zoom:50%;" />

@@ -1,8 +1,17 @@
 import os
+import sys
 import time
 import argparse
 import threading
 import traceback
+# 优先使用从源码安装的 mujoco_lidar（含 core_ti/core_cpu）
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+_mujoco_lidar_build = os.path.join(_script_dir, "..", ".mujoco_lidar_build")
+if os.path.isdir(_mujoco_lidar_build):
+    _build_path = os.path.abspath(_mujoco_lidar_build)
+    if _build_path not in sys.path:
+        sys.path.insert(0, _build_path)
+
 from etils import epath
 
 import mujoco
@@ -83,12 +92,15 @@ class LidarVisualizer(Node):
 
         geomgroup = np.ones((mujoco.mjNGROUP,), dtype=np.ubyte)
         # geomgroup[1] = 0  # 排除group 1中的几何体
-        self.lidar = MjLidarWrapper(mj_model, site_name=self.site_name, backend="gpu", args={'bodyexclude': mj_model.body("mocap_body").id, "geomgroup":geomgroup})
+        backend = getattr(args, 'backend', 'gpu')
+        self.lidar = MjLidarWrapper(mj_model, site_name=self.site_name, backend=backend, args={'bodyexclude': mj_model.body("mocap_body").id, "geomgroup":geomgroup})
 
 def main():
     # 解析命令行参数
     parser = argparse.ArgumentParser(description='MuJoCo LiDAR可视化与ROS2集成')
     parser.add_argument('--verbose', action='store_true', help='显示详细输出信息')
+    parser.add_argument('--backend', choices=['gpu', 'cpu'], default='gpu',
+                        help='LiDAR 计算后端: gpu 需 mujoco_lidar 从源码安装 [taichi]，cpu 无需 core_ti')
     args = parser.parse_args()
 
     print("\n" + "=" * 60)

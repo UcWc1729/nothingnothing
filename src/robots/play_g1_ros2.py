@@ -15,6 +15,15 @@
 """Deploy an MJX policy in ONNX format to C MuJoCo and play with it."""
 
 import os
+import sys
+# 优先使用从源码安装的 mujoco_lidar（含 core_ti/core_cpu）
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+_mujoco_lidar_build = os.path.join(_script_dir, "..", "..", ".mujoco_lidar_build")
+if os.path.isdir(_mujoco_lidar_build):
+    _build_path = os.path.abspath(_mujoco_lidar_build)
+    if _build_path not in sys.path:
+        sys.path.insert(0, _build_path)
+
 from etils import epath
 import mujoco
 import mujoco.viewer as viewer
@@ -303,7 +312,14 @@ if __name__ == "__main__":
         print("rviz2 未找到，请手动安装或手动启动 rviz2 来查看话题。")
     else:
         try:
-            rviz_proc = subprocess.Popen([rviz_exec, "-d", rviz_config])
+            rviz_env = os.environ.copy()
+            rviz_env.setdefault("QT_QPA_PLATFORM", "xcb")
+            if "QT_PLUGIN_PATH" in rviz_env and "cv2" in rviz_env["QT_PLUGIN_PATH"]:
+                rviz_env.pop("QT_PLUGIN_PATH", None)
+            rviz_proc = subprocess.Popen(
+                [rviz_exec, "-d", rviz_config],
+                env=rviz_env,
+            )
             print(f"启动 rviz2 (pid={rviz_proc.pid})，使用配置: {rviz_config}")
         except Exception as e:
             print(f"自动启动 rviz2 失败: {e}")
